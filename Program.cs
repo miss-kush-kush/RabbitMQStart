@@ -1,44 +1,80 @@
-using MassTransit;
+using Azure.Storage.Blobs;
+using ITSTEPRabbitMQ.Storage.Clients;
+using ITSTEPRabbitMQ.Storage.Storage.Clients;
+using ITSTEPRabbitMQ.Storage;
+using ITSTEPRabbitMQ.Storage.Interfaces;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-var configuration = builder.Configuration;
-builder.Services.AddMassTransit(x=>
+class Program
 {
-    x.UsingRabbitMq((context, cfg)=>
+    static async Task Main(string[] args)
     {
-        var host = "192.168.56.1";
-        var port = 5672;
-        var virtualHost = "";
-        var username = "guest";
-        var password = "guest";
+        // Define connection settings and container name
+        string connectionString = "DefaultEndpointsProtocol=https;AccountName=pv121azure;AccountKey=7kdrUTO1rzU0e3DVXn3ggsuLtMoWxoMByPIlJ9vIwN6z8FPmuON/Sb7nTcFr+srqvp6htysHbRHN+AStybU1yg==;EndpointSuffix=core.windows.net";
+        string containerName = "avatarpics";
 
-        cfg.Host(new Uri($"rabbitmq://{host}:{port}/{virtualHost}"), h =>
+        // Define the storage type (1 for Local, 2 for Azure)
+        string storageType = "2"; // Example: Using Azure Storage
+
+        StorageClass storage = storageType switch
         {
-            h.Username(username);
-            h.Password(password);
-        });
-    });
-});
-builder.Services.AddMassTransitHostedService();
+            "1" => new StorageClass(new LocalStorageClient("D:/Programming/avatarpics")),
+            "2" => new StorageClass(new AzureStorageClient(connectionString, containerName)),
+            _ => throw new InvalidOperationException("Invalid storage type")
+        };
 
-var app = builder.Build();
+        // Define file path for upload
+        string filePath = "avatarpics/dog.jpg";
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
+        // Upload file
+        try
+        {
+            using (var fileStream = new FileStream(filePath, FileMode.Open))
+            {
+                await storage.PutFileAsync(Path.GetFileName(filePath), fileStream);
+                Console.WriteLine("Файл загружен.");
+            }
+        }
+        catch (DirectoryNotFoundException ex)
+        {
+            Console.WriteLine($"Directory not found: {ex.Message}");
+        }
+        catch (FileNotFoundException ex)
+        {
+            Console.WriteLine($"File not found: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred: {ex.Message}");
+        }
+
+        // List files
+        var files = await storage.GetFilesAsync();
+        foreach (var file in files)
+        {
+            Console.WriteLine(file);
+        }
+
+        // Get file
+        string fileName = "photo_2023-04-25_21-41-24.jpg"; 
+        using (var fileStream = await storage.GetFileAsync(fileName))
+        {
+            if (fileStream != null)
+            {
+                Console.WriteLine($"Файл {fileName} получен.");
+               
+            }
+            else
+            {
+                Console.WriteLine("Файл не найден.");
+            }
+        }
+
+        //Delete file
+        string fileToDelete = "photo_2023-04-25_21-41-24.jpg";
+        var result = await storage.DeleteFileAsync(fileToDelete);
+        Console.WriteLine(result ? "Файл удален." : "Файл не найден.");
+    }
 }
-app.UseStaticFiles();
-
-app.UseRouting();
-
-app.UseAuthorization();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
-app.Run();
