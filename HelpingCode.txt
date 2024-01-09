@@ -1,0 +1,101 @@
+﻿
+//using MongoDB.Driver;
+//using MongoDB.Bson;
+
+//const string collectionName = "data";
+//const string databaseName = "sample_weatherdata";
+//const string connectionUri = "mongodb+srv://kushnerykyelyzaveta:ThfmOYRw1wGoidnz@cluster0.tgh8ras.mongodb.net/?retryWrites=true&w=majority";
+
+//var settings = MongoClientSettings.FromConnectionString(connectionUri);
+
+//// Set the ServerApi field of the settings object to Stable API version 1
+//settings.ServerApi = new ServerApi(ServerApiVersion.V1);
+
+//// Create a new client and connect to the server
+//var client = new MongoClient(settings);
+
+//// Send a ping to confirm a successful connection
+//try
+//{
+//    var database = client.GetDatabase(databaseName);
+//    var collection = database.GetCollection<BsonDocument>(collectionName);
+//    var documents = collection.Find(new BsonDocument()).ToList();
+//    //foreach (var document in documents)
+//    //{
+//    //    Console.WriteLine(document);
+//    //}
+//    Console.WriteLine(documents[0]);
+//    //var result = client.GetDatabase("admin").RunCommand<BsonDocument>(new BsonDocument("ping", 1));
+//    //Console.WriteLine("Pinged your deployment. You successfully connected to MongoDB!");
+//}
+//catch (Exception ex)
+//{
+//    Console.WriteLine(ex);
+//}
+//using StackExchange.Redis;
+//using System;
+//using System.Threading.Tasks;
+
+//try 
+//{	        
+//	ConnectionMultiplexer redis = ConnectionMultiplexer
+//        .Connect("redis-15702.c53.west-us.azure.cloud.redislabs.com:15702,password=sO64Z5KAZSoTEN6XbxXdDCZq7msJaj5y");
+//    var db = redis.GetDatabase();
+//    Console.WriteLine("Connection Successful");
+//    db.StringSet("key", "vaue");
+
+//}
+//catch (Exception ex)
+//{
+
+//    Console.WriteLine(ex.Message);
+//}
+
+
+
+//using MassTransit;
+
+//var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+//builder.Services.AddControllersWithViews();
+//var configuration = builder.Configuration;
+//builder.Services.AddMassTransit(x =>
+//{
+//    x.UsingRabbitMq((context, cfg) =>
+//    {
+//        var host = "192.168.56.1";
+//        var port = 5672;
+//        var virtualHost = "";
+//        var username = "guest";
+//        var password = "guest";
+
+//        cfg.Host(new Uri($"rabbitmq://{host}:{port}/{virtualHost}"), h =>
+//        {
+//            h.Username(username);
+//            h.Password(password);
+//        });
+//    });
+//});
+//builder.Services.AddMassTransitHostedService();
+
+//builder.Services.AddScoped<StorageClass>();
+
+//var app = builder.Build();
+
+//// Configure the HTTP request pipeline.
+//if (!app.Environment.IsDevelopment())
+//{
+//    app.UseExceptionHandler("/Home/Error");
+//}
+//app.UseStaticFiles();
+
+//app.UseRouting();
+
+//app.UseAuthorization();
+
+//app.MapControllerRoute(
+//    name: "default",
+//    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+//app.Run();
